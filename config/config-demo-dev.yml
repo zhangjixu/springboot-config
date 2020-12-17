@@ -66,4 +66,4 @@ spring:
       group-id: test-consumer-group
 
 kafka:
-  topic: test
+  topic: test1
