@@ -26,3 +26,44 @@ spring:
     maxPoolPreparedStatementPerConnectionSize: 20
     filters: stat,wall,log4j2 # 配置监控统计拦截的 filters
     connectProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000 # 连接属性。比如设置一些连接池统计方面的配置。
+
+  # kafka 配置
+  kafka:
+    bootstrap-servers: 10.244.245.234:9092
+    # 生产者的配置
+    producer:
+      # 每次批量发送消息的数量,produce积累到一定数据，一次发送
+      batch-size: 16384
+      # 0 ： 生产者在成功写入消息之前不会等待任何来自服务器的响应。
+      # 1 ： 只要集群的首领节点收到消息，生产者就会收到一个来自服务器成功响应。
+      # all ：只有当所有参与复制的节点全部收到消息时，生产者才会收到一个来自服务器的成功响应
+      acks: all
+      # 设置大于0的值将使客户端重新发送任何数据，一旦这些数据发送失败。注意，这些重试与客户端接收到发送错误时的重试没有什么不同。允许重试将潜在的改变数据的顺序，
+      # 如果这两个消息记录都是发送到同一个partition，则第一个消息失败第二个发送成功，则第二条消息会比第一条消息出现要早。
+      retries: 0
+      # producer可以用来缓存数据的内存大小。如果数据产生速度大于向broker发送的速度，producer会阻塞或者抛出异常，以“block.on.buffer.full”来表明。
+      # 这项设置将和producer能够使用的总内存相关，但并不是一个硬性的限制，因为不是producer使用的所有内存都是用于缓存。一些额外的内存会用于压缩（如果引入压缩机制），同样还有一些用于维护请求。
+      buffer-memory: 33554432
+      # key序列化方式
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+    # 消费者的配置
+    consumer:
+      # Kafka 中没有初始偏移或如果当前偏移在服务器上不再存在时
+      # earliest 当各分区下有已提交的 offset 时，从提交的 offset 开始消费；无提交的 offset 时，从头开始消费
+      # latest 当各分区下有已提交的 offset 时，从提交的 offset 开始消费；无提交的 offset 时，消费新产生的该分区下的数据
+      # none topic 各分区都存在已提交的 offset 时，从 offset 后开始消费；只要有一个分区不存在已提交的 offset，则抛出异常
+      auto-offset-reset: latest
+      # 是否开启自动提交
+      enable-auto-commit: true
+      # 自动提交的时间间隔
+      auto-commit-interval: 100
+      # key的解码方式
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # value的解码方式
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: test-consumer-group
+
+kafka:
+  topic: test
